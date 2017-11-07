@@ -1,0 +1,47 @@
+Steps:
+
+%% UserApp submitter  
+-	User submits an app's image, parameters and data to be processed (using API or HTTP)
+-	Create a new container (UserApp-X Manager) on MICADO userApp Manager
+-	Pass the image, parqmeters and the data to the created container either by:
+	-	Pushing them during boot
+	-	The container gets them from a queue  
+
+%% UserApp-X Manager 
+# Instance Manager
+-	It processes the parameters.
+-	Depending on the parameters, it calculates (N) the number of instances/replicas need to run simultaneously
+-	It starts the Queue Worker service on the swarm (N instance/replica)
+-	It starts The userApp-X service on the swarm (N instance/replicas)
+
+# Task Dispatcher
+-	It processes the data.
+-	It pushes the data into the queue.
+-	It collects the results.
+-	It can use any queuing systm: rabbitmq, celery, etc.
+
+# Service Monitor
+-	It Monitors the UserApp-X service.
+-	It maintains an periodically updated list of all UserApp-X containers (container_id or docker task_id).
+-	New containers will be added to the (new_userapp_container queue).
+
+# Queue Worker (QW)
+-	The queue worker job is to:
+	-	Launch the execution of the application in an UserApp-X container. 
+	-	Pass the data (to be processed) to the UserApp-X container.
+	-	Collecting the results (if any) when the userApp-X container finished the execution.
+-	The worker can monitor several containers at same time (multithreading) depending on its configuration.
+-	The worker polls periodically the new_userapp_container queue to get new containers (when it has free threads).
+-	
+# Queues
+
+
+%% Methods to send data to UserApp-X container
+-	Parameters to a script.
+-	Volume on a container
+-	User-basd Customized method (HTTP, NFS, etc) 
+
+%% Methods to obtain resutls from UserApp-X container
+-	Value returned from the script.
+-	Volume on a container
+-	User-basd Customized method (HTTP, NFS, etc) 
